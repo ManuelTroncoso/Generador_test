@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Generador de Tests</title>
+<script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+<script>
+var categorias = ["","Javascript", "jQuery", "AngularJS", "PHP", "SQL"];
+var preguntas = [];
+$(document).ready(function(){
+	// La página se ha cargado
+	// Pedimos el recurso por Ajax
+	$.ajax({
+		url : "test.json",
+		type : "GET",
+		dataType : "json",
+		//async : false,
+		success: function (data){
+			preguntas = data;
+		}
+	});
+
+	// Preparar los botones y la categoría seleccionada
+	$("#corregir").attr("disabled",true);
+
+	$("option[value='2']").attr("selected",true);
+
+	$("#generar").click(function(){
+		Generar( $("#categoria").val(), $("#cantidad").val() );
+	});
+
+	$("#corregir").click(function(){
+		// Obtener todos los radio seleccionados
+		var aciertos = $(":radio:checked[value='1']").length;
+		var fallos = $(":radio:checked[value='0']").length;
+		var blancos = $("#cantidad").val() - (aciertos + fallos);
+		var nota = (aciertos-fallos)*10/$("#cantidad").val();
+		$("#resultado").html("Aciertos: "+aciertos+" Fallos: "+fallos+" En blanco: "+blancos+" <strong>NOTA: "+nota+"</strong>");
+		$("#corregir").attr("disabled",true);		
+	});
+
+});
+
+function Generar(categoria, cantidad){
+	var preguntasCategoria = [];
+	for (var i=0; i<preguntas.length; i++){
+		if (preguntas[i].categoria == categoria){
+			preguntasCategoria.push(preguntas[i]);
+		}
+	}
+	if (preguntasCategoria.length == 0){
+		alert("No hay ninguna pregunta de esta categoría");
+	} else{
+		//Ordenamos al azar 
+		preguntasCategoria.sort(function() { return 0.5 - Math.random()});
+		
+		// Controlamos el tope de preguntas
+		cantidad = cantidad>preguntasCategoria.length?preguntasCategoria.length:cantidad;
+		$("#cantidad").val(cantidad);
+		
+		// Eliminamos de preguntasCategoría las que sobren
+		preguntasCategoria.splice(cantidad,preguntasCategoria.length-cantidad);
+		// Presentamos
+		PresentarTest(preguntasCategoria);
+	}
+}
+
+function PresentarTest(p){
+	// Habilito el botón corregir
+	$("#corregir").attr("disabled",false);
+
+	//Presento
+	$("#contenedor").html("");
+	for (var i=0; i<p.length;i++){
+		// Desordenamos las respuestas por pregunta
+		p[i].respuestas.sort(function(){return Math.random() - 0.5})
+		$("#contenedor").append((i+1)+"."+p[i].pregunta+"<br/>");
+		for (var j=0;j<p[i].respuestas.length;j++){
+			$("#contenedor").append("<input type='radio' name='"+i+"' value='"+
+				(p[i].correcta==p[i].respuestas[j].idrespuesta?1:0)+"' />")
+							.append(p[i].respuestas[j].respuesta+"<br/>");			
+		}
+	}
+}
+
+</script>
+</head>
+
+<body>
+<h1>Generador de exámenes tipo test</h1>
+Categoría: <select id="categoria">
+	<script>
+		for (var i=1; i<categorias.length;i++){
+			document.write("<option value='"+i+"'>"+categorias[i]+"</option>");
+	}
+	</script>
+</select>
+Cantidad de preguntas: <input type="number" id="cantidad" value="4" min="1"/>
+<input type="button" id="generar" value="Generar Test">
+<hr>
+<div id="contenedor"></div>
+
+<input type="button" id="corregir" value="Corregir Test">
+<hr>
+<div id="resultado"></div>
+</body>
+</html>
