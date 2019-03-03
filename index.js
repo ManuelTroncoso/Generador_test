@@ -70,6 +70,7 @@ function ComprebaRespuesta(){
           i++;
         }
       });
+      $("#comprueba").remove()
       $("input").prop('disabled', true);
     $("#resultado").append(`<p>Has acertado ${acierto}, has fallado ${fallo} y has dejado en blanco ${preguntas -acierto -fallo}</p>`)
 
