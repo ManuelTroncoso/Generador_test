@@ -48,6 +48,7 @@ function Generar(categoria, cantidad){
 	var preguntasCategoria = [];
 	for (var i=0; i<preguntas.length; i++){
 		if (preguntas[i].categoria == categoria){
+			console.log(preguntas[i].pregunta)
 			preguntasCategoria.push(preguntas[i]);
 		}
 	}

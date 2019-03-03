@@ -1,5 +1,6 @@
 let datos;
 let solucion = Array();
+let preguntas;
 $(function(){
     ConsultaAjax();
     //Añade los datos de las categorias
@@ -27,14 +28,17 @@ function ConsultaAjax(){
 
 
 function CreaPreguntas(){
-    console.log(datos[1])
-
+    $("#resultado").html("");
     preguntas = $("input").val();
     categoria = $("#select").val();
-    for(let i = 0; i<preguntas;i++){
-        //Cambiar datos[i] por datos[random] para que sean aleatorias las preguntas
+    let numero = 0;
+    //Desordenamos las preguntas y de esta manera salen aleatorias.
+    datos.sort(function() { return 0.5 - Math.random()})
+    for(let i = 0; i<datos.length && numero < preguntas;i++){
+        console.log(preguntas)
         if(categoria == datos[i].categoria){
-            $("#resultado").append(`<p>${i+1}.- ${datos[i].pregunta}</p>`)
+            numero++;
+            $("#resultado").append(`<p>${numero}.- ${datos[i].pregunta}</p>`)
             for(let  j = 0; j<datos[i].respuestas.length;j++){
                 $("#resultado").append(`<input type="radio" name="pregunta${i}" value="`+datos[i].respuestas[j].idrespuesta+`">${datos[i].respuestas[j].respuesta}</input><br>`);
             }
@@ -43,6 +47,7 @@ function CreaPreguntas(){
         }
     }
     $("#resultado").append(`<button id="comprueba">Comprueba Test</button>`)
+    $("input").prop('disabled', false);
 
     $("#comprueba").click(function(){
         ComprebaRespuesta();
@@ -51,18 +56,21 @@ function CreaPreguntas(){
 
 function ComprebaRespuesta(){
     let acierto = 0;
+    let fallo = 0;
     let i = 0;
     $("input").each(function() {
         //Si está seleccionado muestra su value
         if($(this).prop('checked')) {
           if($(this).prop('value') == solucion[i]){
               acierto++;
-          } 
+          }
+          else{
+              fallo++
+          }
           i++;
         }
       });
-    console.log(acierto)
-    //console.log(solucion)
-    $("#resultado").append(`<p>Has acertado ${acierto} y has fallado ${i - aciertos}</p>`)
+      $("input").prop('disabled', true);
+    $("#resultado").append(`<p>Has acertado ${acierto}, has fallado ${fallo} y has dejado en blanco ${preguntas -acierto -fallo}</p>`)
 
 }
